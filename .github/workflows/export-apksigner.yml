@@ -1,0 +1,26 @@
+name: Export Android apksigner
+
+on:
+  push:
+    branches: [ "master" ]
+    paths:
+      - ".github/workflows/export-apksigner.yml"
+  workflow_dispatch:
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Locate apksigner jar
+        shell: bash
+        run: |
+          JAR=$(find "$ANDROID_HOME/build-tools" -path "*/lib/apksigner.jar" | sort -V | tail -1)
+          test -f "$JAR"
+          cp "$JAR" "$RUNNER_TEMP/apksigner.jar"
+
+      - name: Upload apksigner jar
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-apksigner
+          path: ${{ runner.temp }}/apksigner.jar
+          if-no-files-found: error
